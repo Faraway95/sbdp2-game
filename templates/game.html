@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目进行中 - Project Burnout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="game-body">
+    <!-- 项目管理 Dashboard -->
+    <div class="project-dashboard">
+        <div class="dashboard-top">
+            <div class="project-info">
+                <h1><span id="stageName">需求调研</span> - 阶段 <span id="currentStage">1</span></h1>
+                <div class="project-status">
+                    <span class="status-indicator active"></span>
+                    <span>In Progress</span>
+                </div>
+                <div class="stage-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="stageProgress"></div>
+                    </div>
+                    <span class="progress-text"><span id="currentNode">0</span>/<span id="totalNodes">4</span></span>
+                </div>
+            </div>
+            
+            <div class="resource-panel">
+                <div class="resource-item">
+                    <span class="resource-label">心态值</span>
+                    <div class="health-bar">
+                        <div class="health-fill" id="healthBar"></div>
+                        <span class="health-text"><span id="currentHP">100</span>/<span id="maxHP">100</span></span>
+                    </div>
+                </div>
+                
+                <div class="resource-item">
+                    <span class="resource-label">精力</span>
+                    <div class="energy-counter">
+                        <span id="currentEnergy">3</span>/3
+                    </div>
+                </div>
+                
+                <div class="resource-item">
+                    <span class="resource-label">预算</span>
+                    <div class="money-counter">
+                        ¥<span id="currentMoney">100</span>
+                    </div>
+                </div>
+                
+                <div class="resource-item">
+                    <span class="resource-label">遗物</span>
+                    <div class="relic-counter" onclick="showRelics()">
+                        <span id="relicCount">0</span> 件
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 战斗界面 -->
+    <div class="combat-area hidden" id="combatArea">
+        <div class="enemy-section">
+            <div class="enemy-card" id="enemyCard">
+                <div class="enemy-header">
+                    <h3 id="enemyName">需求变更</h3>
+                    <div class="enemy-hp">
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="enemyHealthBar"></div>
+                        </div>
+                        <span class="hp-text"><span id="enemyHP">30</span>/<span id="enemyMaxHP">30</span></span>
+                    </div>
+                </div>
+                
+                <div class="enemy-intent">
+                    <div class="intent-icon">⚡</div>
+                    <div class="intent-text" id="enemyIntent">准备攻击</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="player-section">
+            <div class="player-status">
+                <div class="status-item">
+                    <span class="status-label">格挡</span>
+                    <span class="status-value" id="playerBlock">0</span>
+                </div>
+                
+                <div class="pile-status">
+                    <div class="pile-item" onclick="showDrawPile()">
+                        <div class="pile-icon">📚</div>
+                        <div class="pile-label">抽牌堆</div>
+                        <div class="pile-count" id="drawPileCount">10</div>
+                    </div>
+                    
+                    <div class="pile-item" onclick="showDiscardPile()">
+                        <div class="pile-icon">🗑️</div>
+                        <div class="pile-label">弃牌堆</div>
+                        <div class="pile-count" id="discardPileCount">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hand-area">
+                <h4>可用人员 (Available Staff)</h4>
+                <div class="card-hand" id="cardHand">
+                    <!-- 卡牌将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="combat-actions">
+                <button class="btn-secondary" onclick="endTurn()" id="endTurnBtn">
+                    结束回合
+                </button>
+                <button class="btn-danger" onclick="exitCombat()">
+                    退出项目
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 非战斗界面 - 项目地图 -->
+    <div class="map-area" id="mapArea">
+        <div class="map-header">
+            <h2 id="mapStageTitle">需求调研 - 阶段 1</h2>
+            <p id="mapStageDescription">项目启动阶段，收集用户需求</p>
+            <div class="stage-navigation">
+                <div class="stage-indicator" id="stageIndicator">
+                    <!-- 阶段指示器将通过JavaScript生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="project-map" id="projectMap">
+            <!-- 节点将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 消息提示 -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <span id="notificationText"></span>
+        </div>
+    </div>
+    
+    <!-- 遗物展示界面 -->
+    <div class="modal-overlay hidden" id="relicModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>办公室神器</h2>
+                <button class="close-btn" onclick="closeRelicModal()">×</button>
+            </div>
+            <div class="relic-grid" id="relicGrid">
+                <!-- 遗物将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 牌堆查看界面 -->
+    <div class="modal-overlay hidden" id="pileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="pileModalTitle">抽牌堆</h2>
+                <button class="close-btn" onclick="closePileModal()">×</button>
+            </div>
+            <div class="pile-cards" id="pileCards">
+                <!-- 卡牌将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 游戏结束界面 -->
+    <div class="modal-overlay hidden" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">项目失败</h2>
+            <div id="gameOverMessage">
+                <p>您的心态值已经归零...</p>
+                <p class="flavor-text">"也许明天会更好吧" 🫠</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="restartGame()">重新开始</button>
+                <button class="btn-secondary" onclick="returnToMenu()">返回主菜单</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/game-v2.js') }}"></script>
+</body>
+</html>

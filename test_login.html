@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, button { padding: 10px; margin: 5px; display: block; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #ffe6e6; }
+        .success { background-color: #e6ffe6; }
+    </style>
+</head>
+<body>
+    <h1>登录API测试</h1>
+    
+    <div>
+        <h3>1. 测试API连接</h3>
+        <button onclick="testAPI()">测试API连接</button>
+        <div id="apiResult" class="result"></div>
+    </div>
+    
+    <div>
+        <h3>2. 测试登录</h3>
+        <input type="text" id="testUsername" placeholder="用户名" value="test">
+        <input type="password" id="testPassword" placeholder="密码" value="admin">
+        <button onclick="testLogin()">测试登录</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.text();
+                resultDiv.innerHTML = `<strong>API测试成功:</strong><br>${data}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>API测试失败:</strong><br>${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            
+            try {
+                console.log('发送请求:', { username, password });
+                
+                const response = await fetch('/api/start_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                console.log('响应状态:', response.status);
+                console.log('响应头:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('响应文本:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (jsonError) {
+                    throw new Error(`JSON解析失败: ${jsonError.message}. 响应内容: ${responseText}`);
+                }
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<strong>登录成功:</strong><br>${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `<strong>登录失败:</strong><br>${data.error}`;
+                    resultDiv.className = 'result error';
+                }
+                
+            } catch (error) {
+                console.error('登录错误:', error);
+                resultDiv.innerHTML = `<strong>登录异常:</strong><br>${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>

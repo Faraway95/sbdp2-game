@@ -1,0 +1,744 @@
+# 《上班打牌！肉鸽版：游戏圣经》
+文档状态: 概念与原型阶段总结 (V1.0)
+保密等级: 核心机密 (Project Burnout)
+发布日期: 2025年7月28日
+### 1. 项目概述：从“内卷”到“单刷”
+项目目标： 本项目旨在将《上班打牌！》从一款多人对抗卡牌游戏，成功重塑为一款单人肉鸽卡牌 (Roguelike Deckbuilder) 游戏。核心任务是保留并深化其广受欢迎的**“职场讽刺”**主题，同时引入高重玩价值的单人游戏体验。
+核心思路： 我们将玩家置于一个永无止境的“项目周期”中。玩家扮演一名身心俱疲的职场人，通过构建由“同事”、“技能”和“办公室潜规则”组成的卡组，在一个程序化生成的公司迷宫中奋力求生。每一次游戏都是一个新的“项目”，充满了随机的“会议”（战斗）、“奇遇”（事件）和强大的“办公室神器”（遗物）。
+最终成果： 本“圣经”汇总了项目从概念到原型的全部核心资产，包括完整的游戏设计蓝图、独特的“精致荒谬”美术风格定义、可行的技术实现方案，以及一个可交互的核心玩法原型。这为项目进入全面开发阶段提供了坚实的基础。
+> 我们的使命：用最专业的方法论，去包装一场最草台班子的职场闹剧，并让玩家乐在其中。
+### 2. 核心设计文档摘要
+#### 2.1 游戏设计文档 (GDD) 摘要：玩法即“上班”
+GDD 的核心是将职场中的荒诞体验转化为具体的、可玩的策略机制。
+| 系统名称 | 游戏内概念 | 核心机制 | 讽刺内核 |
+| :--- | :--- | :--- | :--- |
+| 卡牌系统 | 员工/任务卡 | 构筑由不同“部门”技能组成的卡组，创造协同效应。如“甩锅”、“画饼”。 | 将职场黑话和潜规则变成制胜法宝。 |
+| 遗物系统 | 办公室神器 | 提供强大被动效果的物品，是构筑玩法的关键。如“人体工学椅”、“永动机咖啡”。 | 将平凡的办公用品“圣物化”，赋予其荒诞的能力。 |
+| 经济系统 | 经费 | 通过战斗和事件获取，用于在“茶水间”（商店）进行消费。 | 模拟有限的项目预算和资源分配。 |
+| 局外成长 | 绩效点数/职级 | 每次游戏结束后根据表现获得点数，用于解锁新部门、卡牌和神器，以及挑战更高难度。 | 象征着无尽的职业发展（内卷）循环。 |
+#### 2.2 美术设计文档摘要：风格即“反差”
+美术的核心是**“精致荒谬 (Refined Absurdity)”**，通过视觉与内容的强烈反差创造黑色幽默。
+#### 2.3 技术开发文档摘要：架构即“稳定”
+技术方案旨在确保开发效率、稳定性和未来扩展性，支撑起独特的设计需求。
+### 3. 视觉资产画廊
+以下是项目概念阶段的关键视觉资产，奠定了“精致荒谬”的艺术基调。
+| 概念美术 | 描述 |
+| :--- | :--- |
+| 
+ | 玩家角色：“项目经理”
+标志性的黑眼圈、松开的领带和永不离手的咖啡，精准捕捉了当代职场人的精神状态——在崩溃的边缘奋力维持专业。 |
+| 
+ | 精英敌人：“竞争对手”
+玩家的“黑暗镜像”。衣着光鲜，笑容自信到傲慢。设计上充满锐利的三角形和攻击性，是职场食物链顶端的掠食者。 |
+| 
+ | “办公室神器”图标集
+从左到右，从上到下：人体工学王座、永动机咖啡、降噪护盾、无尽任务清单。将普通办公用品赋予了神圣的光环和史诗般的名称。 |
+| 
+ | UI/UX 概念布局
+将战斗界面设计成一个清晰的任务看板，包含玩家、敌人、待办事项（敌人意图）和已完成任务（手牌），完美诠释了“伪装成项目管理软件”的核心理念。 |
+### 4. 交互式原型：概念验证
+为了直观验证核心玩法循环和“项目进度图”的体验，我们构建了一个基于Web的交互式原型。该原型动态展示了玩家在地图上导航、遭遇不同类型节点（战斗、休息、事件）并与之交互的核心流程。
+以下是该原型的完整源代码，可直接在浏览器环境中运行。
+<details>
+<summary><strong>点击展开/折叠原型代码</strong></summary>
+index.html (主结构)
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上班打牌！肉鸽版 - 原型</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+</head>
+<body class="bg-brand-deep-blue text-gray-300 font-sans">
+
+    <div id="app" class="w-full h-screen overflow-hidden flex flex-col items-center justify-center p-4 relative">
+        <header class="absolute top-0 left-0 w-full p-4 flex justify-between items-center bg-brand-deep-blue z-20">
+            <h1 class="text-2xl font-bold text-white">项目：Burnout - 进度看板</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-400">版本: 1.0</span>
+                <button class="bg-brand-highlight hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-md flex items-center space-x-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>离职</span>
+                </button>
+            </div>
+        </header>
+
+        <main id="map-container" class="w-full h-full flex items-center justify-center pt-16">
+            <!-- 地图将由 map_generator.js 动态生成 -->
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-75 hidden z-40"></div>
+
+    <!-- 项目会议 (战斗) Modal -->
+    <div id="battle-modal" class="fixed inset-0 m-auto w-11/12 h-5/6 bg-brand-gray rounded-xl shadow-2xl hidden z-50 flex flex-col p-2 transform scale-95 transition-transform duration-300">
+        <div class="flex-grow bg-cover bg-center rounded-lg relative overflow-hidden" style="background-image: url('https://r2.flowith.net/files/o/1753696657403-game_ui_ux_concept_design_index_3@1024x1024.png');">
+            <!-- 使用 concept art 作为背景 -->
+            <div id="battle-content" class="absolute inset-0 flex flex-col">
+                <!-- 顶部敌人区域 -->
+                <div class="flex-1 flex justify-center items-start pt-16">
+                    <div class="flex items-center space-x-16">
+                         <!-- 占位符，模拟敌人UI -->
+                        <div class="text-center">
+                            <div class="bg-red-800 bg-opacity-50 p-2 rounded-lg relative">
+                                <p class="absolute -top-6 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full shadow-md">竞争对手</p>
+                                <img src="https://r2.flowith.net/files/o/1753696656196-competitor_concept_art_index_1@1024x1024.png" alt="竞争对手" class="w-40 h-40 object-contain">
+                                 <div class="absolute -bottom-6 w-full px-2">
+                                    <div class="bg-gray-800 rounded-full h-4 border-2 border-gray-600 overflow-hidden">
+                                        <div class="bg-red-500 h-full" style="width: 80%;"></div>
+                                    </div>
+                                    <span class="text-white font-bold text-sm">120/150</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部玩家区域 -->
+                <div class="h-1/2 flex justify-between items-end p-4">
+                     <!-- 玩家状态 -->
+                    <div class="flex flex-col items-center space-y-4">
+                        <img src="https://r2.flowith.net/files/o/1753696730577-project_manager_concept_art_index_0@1024x1024.png" alt="项目经理" class="w-32 h-32 object-contain bg-blue-900 bg-opacity-50 rounded-full p-2">
+                        <div class="w-48 space-y-2">
+                             <div>
+                                <span class="text-sm font-bold text-white">心态 (HP)</span>
+                                <div class="bg-gray-800 rounded-full h-5 border-2 border-gray-600">
+                                    <div class="bg-brand-psych-blue h-full rounded-full flex items-center justify-center text-xs font-bold" style="width: 75%;">75/100</div>
+                                </div>
+                            </div>
+                             <div>
+                                <span class="text-sm font-bold text-white">精力 (Energy)</span>
+                                <div class="flex space-x-2">
+                                    <div class="w-8 h-8 bg-brand-highlight rounded-full"></div>
+                                    <div class="w-8 h-8 bg-brand-highlight rounded-full"></div>
+                                    <div class="w-8 h-8 bg-brand-highlight rounded-full"></div>
+                                    <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- 遗物区 -->
+                        <div id="relic-container" class="flex space-x-2 p-2 bg-black bg-opacity-30 rounded-lg"></div>
+                    </div>
+
+                    <!-- 手牌区 -->
+                    <div id="hand-container" class="flex-grow h-full flex justify-center items-center space-x-[-2rem]"></div>
+                    
+                    <!-- 牌堆区 -->
+                    <div class="flex flex-col space-y-4">
+                        <div class="bg-gray-800 p-2 rounded-lg text-center">
+                            <i data-lucide="layers" class="mx-auto w-8 h-8"></i>
+                            <span class="font-bold text-lg">24</span>
+                        </div>
+                         <div class="bg-gray-800 p-2 rounded-lg text-center">
+                            <i data-lucide="archive" class="mx-auto w-8 h-8"></i>
+                            <span class="font-bold text-lg">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="close-battle-modal" class="absolute top-4 right-4 text-white hover:text-red-500">
+                <i data-lucide="x-circle" class="w-8 h-8"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 茶水间 (休息) Modal -->
+    <div id="rest-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-brand-gray rounded-xl shadow-2xl p-6 hidden z-50 transform scale-95 transition-transform duration-300">
+        <div class="text-center">
+            <i data-lucide="coffee" class="w-16 h-16 mx-auto text-brand-shop-green mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2 text-white">茶水间</h2>
+            <p class="text-gray-400 mb-6">难得的休息时间。你要做什么？</p>
+            <div class="space-y-4">
+                <button class="w-full bg-brand-psych-blue hover:bg-blue-400 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2">
+                    <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+                    <span>恢复心态 (恢复30%心态)</span>
+                </button>
+                <button class="w-full bg-brand-warn-yellow hover:bg-yellow-400 text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span>团建培训 (升级一张卡牌)</span>
+                </button>
+            </div>
+        </div>
+        <button id="close-rest-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <!-- HR谈话 (事件) Modal -->
+    <div id="event-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-brand-gray rounded-xl shadow-2xl p-6 hidden z-50 transform scale-95 transition-transform duration-300">
+        <div id="event-content" class="text-center">
+            <!-- 内容由JS动态填充 -->
+        </div>
+        <button id="close-event-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+```
+style.css (样式表)
+```css
+:root {
+    --color-brand-deep-blue: #1E3A8A;
+    --color-brand-gray: #4B5563;
+    --color-brand-highlight: #3B82F6;
+    --color-kpi-red: #EF4444;
+    --color-promise-green: #34D399;
+    --color-warn-yellow: #FBBF24;
+    --color-psych-blue: #60A5FA;
+}
+
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+}
+
+.font-flavor {
+    font-family: 'Zhi Mang Xing', cursive;
+}
+
+#app {
+    background: radial-gradient(circle, #2a4aaa, var(--color-brand-deep-blue));
+}
+
+.map-node {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.map-node:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    border-color: var(--color-brand-highlight);
+}
+
+.map-node .icon {
+    transition: transform 0.3s ease;
+}
+
+.map-node:hover .icon {
+    transform: rotate(10deg) scale(1.2);
+}
+
+.path-line {
+    stroke: var(--color-brand-gray);
+    stroke-width: 3px;
+    stroke-dasharray: 8 4;
+    animation: dash 60s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 1000;
+    }
+}
+
+.modal-open {
+    display: flex !important;
+}
+
+.modal-open-flex {
+    display: flex !important;
+}
+
+.modal-open-block {
+    display: block !important;
+}
+
+.modal-visible {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Card Styling */
+.game-card {
+    width: 160px;
+    height: 240px;
+    background-color: #2d3748;
+    border: 2px solid var(--color-brand-gray);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+    position: relative;
+    color: white;
+}
+
+.game-card:hover {
+    transform: translateY(-15px) scale(1.1);
+    z-index: 10;
+    border-color: var(--color-brand-highlight);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    flex-grow: 1;
+}
+
+.card-cost {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--color-brand-highlight);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: 2px solid white;
+}
+
+.card-art {
+    flex-grow: 1;
+    background-color: #1a202c;
+    margin: 8px 0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-art .icon {
+    width: 48px;
+    height: 48px;
+    color: var(--color-brand-highlight);
+}
+
+.card-description {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    background-color: rgba(0,0,0,0.2);
+    padding: 6px;
+    border-radius: 4px;
+    min-height: 50px;
+}
+
+.card-flavor-text {
+    font-size: 0.8rem;
+    color: #a0aec0;
+    margin-top: 6px;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Relic Styling */
+.relic-icon {
+    width: 50px;
+    height: 50px;
+    background-image: url('https://r2.flowith.net/files/o/1753696659656-office_relics_icons_index_2@1024x1024.png');
+    background-size: 850% 750%; /* Adjust based on sprite sheet dimensions */
+    border-radius: 50%;
+    border: 2px solid var(--color-warn-yellow);
+    box-shadow: 0 0 10px var(--color-warn-yellow);
+    transition: transform 0.2s ease;
+}
+
+.relic-icon:hover {
+    transform: scale(1.1);
+}
+```
+main.js (主逻辑)
+```javascript
+import { generateMap } from './map_generator.js';
+import { uiManager } from './ui_manager.js';
+import { gameData } from './game_data.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+
+    const mapContainer = document.getElementById('map-container');
+    generateMap(mapContainer, gameData.mapLayout);
+
+    mapContainer.addEventListener('click', (event) => {
+        const node = event.target.closest('.map-node');
+        if (!node) return;
+
+        const nodeType = node.dataset.nodeType;
+
+        switch (nodeType) {
+            case 'COMBAT':
+            case 'ELITE':
+                uiManager.showBattleModal();
+                break;
+            case 'REST':
+                uiManager.showRestModal();
+                break;
+            case 'EVENT':
+                const randomEvent = gameData.events[Math.floor(Math.random() * gameData.events.length)];
+                uiManager.showEventModal(randomEvent);
+                break;
+            default:
+                console.log('Unknown node type:', nodeType);
+        }
+    });
+
+
+    document.getElementById('close-battle-modal').addEventListener('click', uiManager.hideAllModals);
+    document.getElementById('close-rest-modal').addEventListener('click', uiManager.hideAllModals);
+    document.getElementById('close-event-modal').addEventListener('click', uiManager.hideAllModals);
+    document.getElementById('modal-backdrop').addEventListener('click', uiManager.hideAllModals);
+
+});
+```
+game_data.js (游戏数据)
+```javascript
+export const gameData = {
+    mapLayout: [
+        [{ type: 'COMBAT', connections: [{ row: 1, col: 0 }] }],
+        [{ type: 'COMBAT', connections: [{ row: 2, col: 0 }, { row: 2, col: 1 }] }, null],
+        [{ type: 'EVENT', connections: [{ row: 3, col: 0 }] }, { type: 'COMBAT', connections: [{ row: 3, col: 0 }] }],
+        [{ type: 'REST', connections: [{ row: 4, col: 1 }] }, null],
+        [null, { type: 'ELITE', connections: [{ row: 5, col: 1 }] }],
+        [null, { type: 'COMBAT', connections: [{ row: 6, col: 0 }, { row: 6, col: 1 }] }],
+        [{ type: 'EVENT', connections: [{ row: 7, col: 1 }] }, { type: 'SHOP', connections: [{ row: 7, col: 1 }] }],
+        [null, { type: 'REST', connections: [{ row: 8, col: 1 }] }],
+        [null, { type: 'BOSS', connections: [] }],
+    ],
+    cards: [
+        {
+            name: "甩锅",
+            cost: 1,
+            type: "攻击",
+            department: "通用",
+            icon: "send-to-back",
+            description: "造成7点【业绩压力】。施加1层【问责】。",
+            flavorText: "这事儿从一开始就不是我负责的。"
+        },
+        {
+            name: "摸鱼",
+            cost: 1,
+            type: "技能",
+            department: "通用",
+            icon: "fish",
+            description: "获得5点【心理防线】。抽1张牌。",
+            flavorText: "带薪上厕所，职场第一课。"
+        },
+        {
+            name: "画饼",
+            cost: 0,
+            type: "技能",
+            department: "市场部",
+            icon: "pie-chart",
+            description: "获得2点【精力】，抽3张牌。下回合开始时，失去3点【精力】。",
+            flavorText: "等项目上市了，咱们都财务自由！"
+        },
+        {
+            name: "需求变更",
+            cost: 2,
+            type: "攻击",
+            department: "技术部",
+            icon: "repeat",
+            description: "造成4次2点的【业绩压力】。",
+            flavorText: "我们想要一个五彩斑斓的黑。"
+        },
+        {
+            name: "向上管理",
+            cost: 1,
+            type: "技能",
+            department: "通用",
+            icon: "trending-up",
+            description: "获得8点【心理防线】。下回合获得1点额外【精力】。",
+            flavorText: "领导您说的都对，另外这个资源…"
+        },
+        {
+            name: "紧急上线",
+            cost: "X",
+            type: "攻击",
+            department: "技术部",
+            icon: "rocket",
+            description: "消耗所有【精力】。每消耗1点，对所有敌人造成7点【业绩压力】。",
+            flavorText: "先发了再说，出了问题再修复！"
+        },
+        {
+            name: "企业文化",
+            cost: 3,
+            type: "能力",
+            department: "人力资源部",
+            icon: "book-copy",
+            description: "被动: 每当你打出3张牌，对随机一个敌人造成5点【业绩压力】。",
+            flavorText: "赋能、闭环、抓手、对齐、颗粒度。"
+        },
+        {
+            name: "裁员",
+            cost: 1,
+            type: "技能",
+            department: "人力资源部",
+            icon: "user-minus",
+            description: "消耗。从你的手牌中消耗一张牌，获得等同于其精力消耗的经费。",
+            flavorText: "基于公司战略调整和组织优化……"
+        }
+    ],
+    relics: [
+        { 
+            name: "人体工学椅", 
+            description: "每场战斗开始时，获得7点“心理防线”。",
+            spritePosition: "0% 0%"
+        },
+        { 
+            name: "永动机咖啡", 
+            description: "在你的回合开始时，获得1点【精力】。",
+            spritePosition: "14.2% 0%"
+        },
+        { 
+            name: "降噪耳机", 
+            description: "每场战斗中，你受到的第一次负面状态效果无效。",
+            spritePosition: "28.4% 0%"
+        },
+    ],
+    events: [
+        {
+            title: "关于“团建”的紧急通知",
+            description: "HR突然宣布，为了增强团队凝聚力，本周六将举行“自愿”参加的团建活动。不去似乎会影响考评，但你真的需要休息。",
+            choices: [
+                { text: "“自愿”参加 (获得1件随机遗物，但最大心态-5)" },
+                { text: "婉言谢绝 (什么都不发生)" }
+            ]
+        },
+        {
+            title: "神秘的U盘",
+            description: "你在茶水间的咖啡机旁边发现一个没有标签的U盘。里面可能是公司机密，也可能是病毒，或者......只是某个同事忘拿了。",
+            choices: [
+                { text: "插入电脑查看 (50%几率获得强力卡牌，50%几率获得【病毒】状态卡)" },
+                { text: "交给IT部门 (获得少量经费)" }
+            ]
+        }
+    ]
+};
+```
+map_generator.js 和 ui_manager.js (支持模块)
+```javascript
+// map_generator.js
+export function generateMap(container, layout) {
+    container.innerHTML = '';
+    const svgNs = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('class', 'absolute top-0 left-0 w-full h-full');
+
+    const nodeElements = [];
+
+    const columnWidth = 180;
+    const rowHeight = 120;
+    const totalWidth = layout.reduce((max, row) => Math.max(max, row.length), 0) * columnWidth;
+    const totalHeight = layout.length * rowHeight;
+
+    const mapWrapper = document.createElement('div');
+    mapWrapper.style.position = 'relative';
+    mapWrapper.style.width = `${totalWidth}px`;
+    mapWrapper.style.height = `${totalHeight}px`;
+
+    layout.forEach((row, rowIndex) => {
+        row.forEach((node, colIndex) => {
+            if (!node) return;
+
+            const nodeEl = createNodeElement(node, rowIndex, colIndex);
+            
+            const x = (colIndex * columnWidth) + (columnWidth / 2);
+            const y = (layout.length - 1 - rowIndex) * rowHeight + (rowHeight / 2);
+
+            nodeEl.style.position = 'absolute';
+            nodeEl.style.left = `${x - 64}px`; // 128px width / 2
+            nodeEl.style.top = `${y - 40}px`; // 80px height / 2
+
+            mapWrapper.appendChild(nodeEl);
+            nodeElements.push({ ...node, el: nodeEl, x, y, rowIndex, colIndex });
+        });
+    });
+
+    drawConnections(svg, nodeElements, layout);
+    
+    container.appendChild(svg);
+    container.appendChild(mapWrapper);
+}
+
+function createNodeElement(nodeInfo, rowIndex, colIndex) {
+    const nodeEl = document.createElement('div');
+    nodeEl.className = 'map-node w-32 h-20 p-2 rounded-lg flex flex-col items-center justify-center shadow-lg';
+    nodeEl.dataset.nodeType = nodeInfo.type;
+    nodeEl.dataset.nodeId = `${rowIndex}-${colIndex}`;
+
+    const typeColors = {
+        'COMBAT': 'bg-brand-gray',
+        'ELITE': 'bg-red-900 border-2 border-kpi-red',
+        'EVENT': 'bg-yellow-800 border-2 border-warn-yellow',
+        'REST': 'bg-blue-800 border-2 border-psych-blue',
+        'SHOP': 'bg-green-800 border-2 border-promise-green',
+        'BOSS': 'bg-purple-900 border-2 border-purple-500 scale-125'
+    };
+
+    const typeIcons = {
+        'COMBAT': 'swords',
+        'ELITE': 'shield-alert',
+        'EVENT': 'help-circle',
+        'REST': 'bed-double',
+        'SHOP': 'shopping-cart',
+        'BOSS': 'crown'
+    };
+    
+    const typeText = {
+        'COMBAT': '日常任务',
+        'ELITE': '紧急会议',
+        'EVENT': 'HR谈话',
+        'REST': '茶水间',
+        'SHOP': '资源采购',
+        'BOSS': '项目交付'
+    };
+
+    nodeEl.classList.add(...(typeColors[nodeInfo.type] || 'bg-gray-700').split(' '));
+
+    nodeEl.innerHTML = `
+        <i data-lucide="${typeIcons[nodeInfo.type] || 'circle-dashed'}" class="icon w-8 h-8 mb-1"></i>
+        <p class="text-xs font-bold text-center">${typeText[nodeInfo.type] || '未知节点'}</p>
+    `;
+
+    return nodeEl;
+}
+
+function drawConnections(svg, nodeElements, layout) {
+    const svgNs = "http://www.w3.org/2000/svg";
+    nodeElements.forEach(node => {
+        if (node.connections) {
+            node.connections.forEach(conn => {
+                const targetNode = nodeElements.find(n => n.rowIndex === conn.row && n.colIndex === conn.col);
+                if (targetNode) {
+                    const line = document.createElementNS(svgNs, "line");
+                    line.setAttribute('x1', node.x);
+                    line.setAttribute('y1', node.y);
+                    line.setAttribute('x2', targetNode.x);
+                    line.setAttribute('y2', targetNode.y);
+                    line.setAttribute('class', 'path-line');
+                    svg.appendChild(line);
+                }
+            });
+        }
+    });
+}
+```
+```javascript
+// ui_manager.js
+import { gameData } from './game_data.js';
+
+const backdrop = document.getElementById('modal-backdrop');
+const battleModal = document.getElementById('battle-modal');
+const restModal = document.getElementById('rest-modal');
+const eventModal = document.getElementById('event-modal');
+
+const modals = [battleModal, restModal, eventModal];
+
+function createCardElement(cardData) {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'game-card';
+    
+
+    const departmentColors = {
+        '技术部': 'border-blue-500',
+        '市场部': 'border-green-500',
+        '人力资源部': 'border-yellow-500',
+        '通用': 'border-gray-500',
+    };
+    cardEl.classList.add(departmentColors[cardData.department] || 'border-gray-500');
+
+
+    cardEl.innerHTML = `
+        <div class="card-header">
+            <span class="card-name">${cardData.name}</span>
+            <div class="card-cost">${cardData.cost}</div>
+        </div>
+        <div class="card-art">
+             <i data-lucide="${cardData.icon || 'star'}" class="icon"></i>
+        </div>
+        <div class="card-description">${cardData.description.replace(/【/g, '<strong>【').replace(/】/g, '】</strong>')}</div>
+        <p class="card-flavor-text font-flavor">${cardData.flavorText}</p>
+    `;
+    return cardEl;
+}
+
+function createRelicElement(relicData) {
+    const relicEl = document.createElement('div');
+    relicEl.className = 'relic-icon';
+    relicEl.style.backgroundPosition = relicData.spritePosition;
+    relicEl.title = `${relicData.name}\n${relicData.description}`;
+    return relicEl;
+}
+
+export const uiManager = {
+    showBattleModal() {
+        const handContainer = document.getElementById('hand-container');
+        handContainer.innerHTML = '';
+        const randomCards = [...gameData.cards].sort(() => 0.5 - Math.random()).slice(0, 5);
+        randomCards.forEach(card => {
+            const cardEl = createCardElement(card);
+            handContainer.appendChild(cardEl);
+        });
+
+        const relicContainer = document.getElementById('relic-container');
+        relicContainer.innerHTML = '';
+        const randomRelics = [...gameData.relics].sort(() => 0.5 - Math.random()).slice(0, 3);
+        randomRelics.forEach(relic => {
+            const relicEl = createRelicElement(relic);
+            relicContainer.appendChild(relicEl);
+        });
+
+        lucide.createIcons();
+        this.openModal(battleModal, 'modal-open-flex');
+    },
+
+    showRestModal() {
+        this.openModal(restModal, 'modal-open-block');
+    },
+
+    showEventModal(eventData) {
+        const eventContent = document.getElementById('event-content');
+        eventContent.innerHTML = `
+            <i data-lucide="info" class="w-16 h-16 mx-auto text-brand-warn-yellow mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2 text-white">${eventData.title}</h2>
+            <p class="text-gray-400 mb-6">${eventData.description}</p>
+            <div class="space-y-4">
+                <button class="w-full bg-brand-highlight hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg">${eventData.choices[0].text}</button>
+                <button class="w-full bg-brand-gray hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg">${eventData.choices[1].text}</button>
+            </div>
+        `;
+        this.openModal(eventModal, 'modal-open-block');
+    },
+
+    hideAllModals() {
+        backdrop.classList.add('hidden');
+        modals.forEach(modal => {
+            modal.classList.add('hidden');
+            modal.classList.remove('modal-open', 'modal-open-flex', 'modal-open-block', 'modal-visible');
+        });
+    },
+
+    openModal(modalElement, displayClass = 'modal-open') {
+        this.hideAllModals();
+        backdrop.classList.remove('hidden');
+        modalElement.classList.remove('hidden');
+        modalElement.classList.add(displayClass);
+        setTimeout(() => modalElement.classList.add('modal-visible'), 10);
+    }
+};
+```
+</details>
+### 5. 结语与展望：项目启动
+项目总结：至此，《上班打牌！肉鸽版》已完成全面的概念设计与原型验证阶段。我们成功地将一个深受喜爱的IP，转化为了一个具备深度策略、强烈主题和高重玩价值的单人肉鸽游戏框架。核心玩法、美术风格和技术路线均已明确，并得到了原型验证。
+下一步行动计划 (Action Plan):随着本“游戏圣经”的交付，项目正式从“务虚”进入“务实”阶段。建议立即启动以下工作，以进入全面开发：
+> “会议开完了，PPT也做好了，现在，该真正开始干活了。”

@@ -1,0 +1,23 @@
+{
+  "name": "上班打牌！肉鸽版",
+  "description": "一款融合现代职场讽刺与单人肉鸽卡牌玩法的策略游戏",
+  "repository": "https://github.com/your-username/SBDP2",
+  "keywords": ["python", "flask", "game", "roguelike", "deckbuilder"],
+  "env": {
+    "FLASK_ENV": {
+      "description": "Flask environment",
+      "value": "production"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
