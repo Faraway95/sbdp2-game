@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+
+# 强制设置UTF-8编码环境
+if sys.platform.startswith('win'):
+    # 设置环境变量
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    # 重新配置标准输出流
+    import io
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    else:
+        # 对于较老的Python版本
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -9,17 +24,6 @@ import random
 import uuid
 from datetime import datetime
 from game_data import CARDS, ENEMIES, RELICS, PROJECT_STAGES, GameLogic
-
-# 设置UTF-8编码
-if sys.platform.startswith('win'):
-    import locale
-    try:
-        locale.setlocale(locale.LC_ALL, 'Chinese_China.UTF-8')
-    except:
-        try:
-            locale.setlocale(locale.LC_ALL, 'zh_CN.UTF-8')
-        except:
-            pass
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'sbdp2_office_card_game_secret_key')
@@ -129,10 +133,11 @@ def start_game():
         username = data.get('username', '').strip()
         password = data.get('password', '').strip()
         
+        # 安全的调试输出
         try:
-            print(f"Login attempt - user: {username}, password: {password}")  # Debug info
-        except UnicodeEncodeError:
-            print("Login attempt - user: [encoded], password: [encoded]")
+            print(f"Login attempt - user: {repr(username)}, password: {repr(password)}")
+        except Exception:
+            print("Login attempt - encoding safe mode")
         
         if not username:
             return jsonify({'success': False, 'error': 'Please enter employee ID'}), 400
@@ -178,20 +183,24 @@ def start_game():
             }
         }
         
+        # 安全的调试输出
         try:
-            print(f"Login success - response: {response_data}")  # Debug info
-        except UnicodeEncodeError:
-            print("Login successful")
+            print(f"Login success - response: {repr(response_data)}")
+        except Exception:
+            print("Login successful - encoding safe mode")
         return jsonify(response_data)
         
     except Exception as e:
         db.session.rollback()
         error_msg = str(e)
         try:
-            print(f"Login error: {error_msg}")
-        except UnicodeEncodeError:
-            print("Login error occurred")
-        return jsonify({'success': False, 'error': f'System error: {error_msg}'}), 500
+            print(f"Login error: {repr(error_msg)}")
+        except Exception:
+            print("Login error occurred - encoding safe mode")
+        
+        # 确保错误消息也是安全的
+        safe_error_msg = repr(error_msg) if any(ord(c) > 127 for c in error_msg) else error_msg
+        return jsonify({'success': False, 'error': f'System error: {safe_error_msg}'}), 500
 
 @app.route('/api/get_game_state')
 def get_game_state():

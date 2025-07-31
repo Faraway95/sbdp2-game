@@ -11,7 +11,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(rm:*)",
-      "Bash(del /f instanceoffice_card_game.db instancetest_login.db)"
+      "Bash(del /f instanceoffice_card_game.db instancetest_login.db)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

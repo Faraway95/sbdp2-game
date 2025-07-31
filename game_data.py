@@ -1,7 +1,21 @@
+# -*- coding: utf-8 -*-
 """
 游戏数据模型 - 卡牌、敌人、遗物定义
 """
 import random
+import sys
+import os
+
+# 设置UTF-8编码
+if sys.platform.startswith('win'):
+    import locale
+    try:
+        locale.setlocale(locale.LC_ALL, 'Chinese_China.UTF-8')
+    except:
+        try:
+            locale.setlocale(locale.LC_ALL, 'zh_CN.UTF-8')
+        except:
+            pass
 
 # 卡牌数据
 CARDS = {
