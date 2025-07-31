@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 游戏数据模型 - 卡牌、敌人、遗物定义
+从CSV配置文件中加载数据
 """
 import random
 import sys
 import os
+import csv
+import json
 
 # 设置UTF-8编码
 if sys.platform.startswith('win'):
@@ -17,8 +20,53 @@ if sys.platform.startswith('win'):
         except:
             pass
 
-# 卡牌数据
-CARDS = {
+def load_csv_config(filename):
+    """加载CSV配置文件"""
+    config = {}
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                config[row[list(row.keys())[0]]] = row
+    except FileNotFoundError:
+        print(f"Warning: {filename} not found, using default data")
+    except Exception as e:
+        print(f"Error loading {filename}: {e}")
+    return config
+
+# 加载配置文件
+CARDS_CONFIG = load_csv_config('cards_config.csv')
+RELICS_CONFIG = load_csv_config('relics_config.csv')
+MAP_CONFIG = load_csv_config('map_nodes_config.csv')
+
+# 基于配置文件生成卡牌数据
+def generate_cards_from_config():
+    """从配置文件生成卡牌数据"""
+    cards = {}
+    for card_id, config in CARDS_CONFIG.items():
+        cards[card_id] = {
+            "name": config.get("中文名", card_id),
+            "english_name": config.get("英文名", ""),
+            "cost": int(config.get("消耗精力", 1)),
+            "type": config.get("类型", "攻击"),
+            "rarity": config.get("稀有度", "普通"),
+            "damage": int(config.get("伤害", 0)) if config.get("伤害") else 0,
+            "block": int(config.get("格挡", 0)) if config.get("格挡") else 0,
+            "draw": int(config.get("抽牌", 0)) if config.get("抽牌") else 0,
+            "energy": int(config.get("获得精力", 0)) if config.get("获得精力") else 0,
+            "effect": config.get("特殊效果", ""),
+            "description": config.get("描述", ""),
+            "icon": config.get("配图建议", "🃏"),
+            "source": config.get("获得途径", "未知")
+        }
+    return cards
+
+# 如果配置文件存在则使用配置，否则使用默认数据
+if CARDS_CONFIG:
+    CARDS = generate_cards_from_config()
+else:
+    # 默认卡牌数据（兼容性）
+    CARDS = {
     # 基础卡牌
     "甩锅": {
         "name": "甩锅",

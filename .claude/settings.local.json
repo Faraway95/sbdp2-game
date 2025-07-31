@@ -14,7 +14,8 @@
       "Bash(del /f instanceoffice_card_game.db instancetest_login.db)",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

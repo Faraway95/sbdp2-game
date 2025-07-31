@@ -159,7 +159,7 @@ def start_game():
         
         # 创建游戏会话
         session_id = str(uuid.uuid4())
-        starter_deck = ['blame_shift', 'slack_off', 'empty_promise', 'manage_up', 'blame_shift', 'slack_off', 'empty_promise', 'manage_up', 'meeting', 'team_building']
+        starter_deck = ['甩锅', '摸鱼', '画饼', '向上管理', '甩锅', '摸鱼', '画饼', '向上管理', '开会', '团建']
         game_session = GameSession(
             id=session_id,
             player_id=player.id,
@@ -240,7 +240,7 @@ def start_combat():
     # 存储战斗状态到session
     session['combat_state'] = {
         'enemy': enemy,
-        'player_hand': ['blame_shift', 'slack_off', 'empty_promise', 'manage_up', 'blame_shift'],
+        'player_hand': ['甩锅', '摸鱼', '画饼', '向上管理', '甩锅'],
         'player_block': 0,
         'player_buffs': {},
         'turn': 'player'
@@ -352,7 +352,7 @@ def end_turn():
     
     # 重置回合
     game_session.energy = 3  # 基础精力
-    combat_state['player_hand'] = ['blame_shift', 'slack_off', 'empty_promise', 'manage_up', 'blame_shift']  # Redraw cards
+    combat_state['player_hand'] = ['甩锅', '摸鱼', '画饼', '向上管理', '甩锅']  # Redraw cards
     combat_state['player_block'] = 0  # 清除格挡
     
     # 检查玩家是否死亡

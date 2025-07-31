@@ -20,8 +20,58 @@ let gameState = {
     discardPile: [],
     relics: [],
     inCombat: false,
-    mapData: null
+    mapData: null,
+    currentLayer: 1,
+    completedNodes: [],
+    availableNodes: []
 };
+
+// 地图配置数据
+const mapConfiguration = [
+    // 第1层 - 起始战斗
+    {
+        layer: 1,
+        nodes: [
+            { id: '1-1', type: 'combat', name: '实习生', icon: '👶', connections: ['2-1', '2-2'] },
+            { id: '1-2', type: 'combat', name: '产品经理', icon: '📋', connections: ['2-1', '2-3'] },
+            { id: '1-3', type: 'combat', name: 'UI设计师', icon: '🎨', connections: ['2-2', '2-3'] }
+        ]
+    },
+    // 第2层 - 混合节点
+    {
+        layer: 2,
+        nodes: [
+            { id: '2-1', type: 'shop', name: '茶水间', icon: '☕', connections: ['3-1', '3-2'] },
+            { id: '2-2', type: 'event', name: '会议室', icon: '🏢', connections: ['3-1', '3-3'] },
+            { id: '2-3', type: 'combat', name: '技术主管', icon: '👨‍💻', connections: ['3-2', '3-3'] }
+        ]
+    },
+    // 第3层 - 进阶挑战
+    {
+        layer: 3,
+        nodes: [
+            { id: '3-1', type: 'combat', name: '运营总监', icon: '📈', connections: ['4-1', '4-2'] },
+            { id: '3-2', type: 'relic', name: '人事部', icon: '👥', connections: ['4-1', '4-3'] },
+            { id: '3-3', type: 'combat', name: '财务经理', icon: '💰', connections: ['4-2', '4-3'] }
+        ]
+    },
+    // 第4层 - 最终准备
+    {
+        layer: 4,
+        nodes: [
+            { id: '4-1', type: 'combat', name: '副总裁', icon: '👔', connections: ['5-1'] },
+            { id: '4-2', type: 'shop', name: 'CEO办公室外', icon: '🚪', connections: ['5-1'] },
+            { id: '4-3', type: 'event', name: '董事会', icon: '🎩', connections: ['5-1'] }
+        ]
+    },
+    // 第5层 - BOSS
+    {
+        layer: 5,
+        nodes: [
+            { id: '5-1', type: 'boss', name: 'CEO', icon: '👑', connections: [] }
+        ]
+    }
+];
 
 // 扩展卡牌数据（包含所有新卡牌）
 const cardData = {
@@ -986,3 +1036,332 @@ gameStyle.textContent = `
     .node-event { border-color: var(--defense-blue); }
 `;
 document.head.appendChild(gameStyle);
+
+// ===== 地图系统功能 =====
+
+/**
+ * 初始化地图系统
+ */
+function initializeMap() {
+    // 初始设置：第一层的所有节点都可用
+    gameState.availableNodes = ['1-1', '1-2', '1-3'];
+    gameState.completedNodes = [];
+    gameState.currentLayer = 1;
+    
+    renderMap();
+    renderNavigation();
+}
+
+/**
+ * 渲染地图
+ */
+function renderMap() {
+    const mapContent = document.getElementById('mapContent');
+    mapContent.innerHTML = '';
+    
+    // 从上到下渲染每一层（倒序，因为杀戮尖塔风格是从下往上）
+    for (let i = mapConfiguration.length - 1; i >= 0; i--) {
+        const layer = mapConfiguration[i];
+        const layerElement = createLayerElement(layer);
+        mapContent.appendChild(layerElement);
+    }
+    
+    // 渲染连接线
+    setTimeout(() => renderConnections(), 100); // 延迟一下确保节点已渲染
+}
+
+/**
+ * 创建层级元素
+ */
+function createLayerElement(layer) {
+    const layerDiv = document.createElement('div');
+    layerDiv.className = 'map-layer';
+    layerDiv.dataset.layer = layer.layer;
+    
+    // 层级标签
+    const layerLabel = document.createElement('div');
+    layerLabel.className = 'layer-label';
+    layerLabel.textContent = `第${layer.layer}层`;
+    layerDiv.appendChild(layerLabel);
+    
+    // 节点容器
+    const nodesContainer = document.createElement('div');
+    nodesContainer.className = 'layer-nodes';
+    nodesContainer.style.display = 'flex';
+    nodesContainer.style.justifyContent = 'center';
+    nodesContainer.style.gap = '3rem';
+    
+    layer.nodes.forEach(node => {
+        const nodeElement = createNodeElement(node);
+        nodesContainer.appendChild(nodeElement);
+    });
+    
+    layerDiv.appendChild(nodesContainer);
+    return layerDiv;
+}
+
+/**
+ * 创建节点元素
+ */
+function createNodeElement(node) {
+    const nodeDiv = document.createElement('div');
+    nodeDiv.className = `map-node ${node.type}`;
+    nodeDiv.dataset.nodeId = node.id;
+    nodeDiv.dataset.nodeType = node.type;
+    
+    // 设置节点状态
+    if (gameState.completedNodes.includes(node.id)) {
+        nodeDiv.classList.add('completed');
+    } else if (gameState.availableNodes.includes(node.id)) {
+        nodeDiv.classList.add('available');
+    } else {
+        nodeDiv.classList.add('locked');
+    }
+    
+    // 节点内容
+    const nodeIcon = document.createElement('div');
+    nodeIcon.className = 'node-icon';
+    nodeIcon.textContent = node.icon;
+    
+    const nodeLabel = document.createElement('div');
+    nodeLabel.className = 'node-label';
+    nodeLabel.textContent = node.name;
+    
+    // 悬浮提示
+    const tooltip = document.createElement('div');
+    tooltip.className = 'node-tooltip';
+    tooltip.textContent = getNodeDescription(node);
+    
+    nodeDiv.appendChild(nodeIcon);
+    nodeDiv.appendChild(nodeLabel);
+    nodeDiv.appendChild(tooltip);
+    
+    // 添加点击事件
+    if (gameState.availableNodes.includes(node.id)) {
+        nodeDiv.addEventListener('click', () => selectNode(node));
+    }
+    
+    return nodeDiv;
+}
+
+/**
+ * 获取节点描述
+ */
+function getNodeDescription(node) {
+    const descriptions = {
+        combat: '战斗 - 获得金钱和经验',
+        shop: '商店 - 购买卡牌和遗物',
+        event: '随机事件 - 风险与机遇并存',
+        relic: '遗物 - 获得强力道具',
+        boss: '最终BOSS - 击败CEO！'
+    };
+    return descriptions[node.type] || '未知节点';
+}
+
+/**
+ * 渲染连接线
+ */
+function renderConnections() {
+    // 清除现有连接线
+    document.querySelectorAll('.map-connection').forEach(el => el.remove());
+    
+    mapConfiguration.forEach(layer => {
+        layer.nodes.forEach(node => {
+            const nodeElement = document.querySelector(`[data-node-id="${node.id}"]`);
+            if (!nodeElement) return;
+            
+            node.connections.forEach(targetId => {
+                const targetElement = document.querySelector(`[data-node-id="${targetId}"]`);
+                if (!targetElement) return;
+                
+                const connection = createConnectionLine(nodeElement, targetElement);
+                document.querySelector('.map-container').appendChild(connection);
+            });
+        });
+    });
+}
+
+/**
+ * 创建连接线
+ */
+function createConnectionLine(fromElement, toElement) {
+    const fromRect = fromElement.getBoundingClientRect();
+    const toRect = toElement.getBoundingClientRect();
+    const containerRect = document.querySelector('.map-container').getBoundingClientRect();
+    
+    const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+    const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+    const toX = toRect.left + toRect.width / 2 - containerRect.left;
+    const toY = toRect.top + toRect.height / 2 - containerRect.top;
+    
+    const length = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+    const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+    
+    const line = document.createElement('div');
+    line.className = 'map-connection';
+    line.style.position = 'absolute';
+    line.style.left = fromX + 'px';
+    line.style.top = fromY + 'px';
+    line.style.width = length + 'px';
+    line.style.transform = `rotate(${angle}deg)`;
+    
+    // 如果路径已激活则高亮
+    const fromNodeId = fromElement.dataset.nodeId;
+    const toNodeId = toElement.dataset.nodeId;
+    if (gameState.completedNodes.includes(fromNodeId) || gameState.availableNodes.includes(toNodeId)) {
+        line.classList.add('active');
+    }
+    
+    return line;
+}
+
+/**
+ * 选择节点
+ */
+async function selectNode(node) {
+    try {
+        showNotification(`进入：${node.name}`, 'info');
+        
+        switch (node.type) {
+            case 'combat':
+                await startCombat();
+                break;
+            case 'shop':
+                showShop();
+                break;
+            case 'event':
+                showEvent();
+                break;
+            case 'relic':
+                showRelicReward();
+                break;
+            case 'boss':
+                await startBossFight();
+                break;
+        }
+        
+        // 完成节点
+        completeNode(node.id);
+        
+    } catch (error) {
+        console.error('选择节点错误:', error);
+        showNotification('节点处理失败，请重试', 'error');
+    }
+}
+
+/**
+ * 完成节点
+ */
+function completeNode(nodeId) {
+    // 添加到已完成节点
+    if (!gameState.completedNodes.includes(nodeId)) {
+        gameState.completedNodes.push(nodeId);
+    }
+    
+    // 移除当前可用节点
+    gameState.availableNodes = gameState.availableNodes.filter(id => id !== nodeId);
+    
+    // 找到该节点并激活其连接的节点
+    const node = findNodeById(nodeId);
+    if (node) {
+        node.connections.forEach(connectionId => {
+            if (!gameState.completedNodes.includes(connectionId) && 
+                !gameState.availableNodes.includes(connectionId)) {
+                gameState.availableNodes.push(connectionId);
+            }
+        });
+        
+        // 检查是否需要更新当前层级
+        const nodeLayer = parseInt(nodeId.split('-')[0]);
+        if (nodeLayer > gameState.currentLayer) {
+            gameState.currentLayer = nodeLayer;
+        }
+    }
+    
+    // 重新渲染地图
+    renderMap();
+    renderNavigation();
+}
+
+/**
+ * 根据ID查找节点
+ */
+function findNodeById(nodeId) {
+    for (const layer of mapConfiguration) {
+        const node = layer.nodes.find(n => n.id === nodeId);
+        if (node) return node;
+    }
+    return null;
+}
+
+/**
+ * 渲染导航
+ */
+function renderNavigation() {
+    const navigation = document.getElementById('mapNavigation');
+    navigation.innerHTML = '';
+    
+    mapConfiguration.forEach(layer => {
+        const navDot = document.createElement('div');
+        navDot.className = 'nav-layer';
+        navDot.dataset.layer = layer.layer;
+        
+        // 设置导航点状态
+        if (layer.layer === gameState.currentLayer) {
+            navDot.classList.add('current');
+        } else if (layer.layer < gameState.currentLayer) {
+            navDot.classList.add('completed');
+        }
+        
+        // 添加点击滚动功能
+        navDot.addEventListener('click', () => {
+            const layerElement = document.querySelector(`[data-layer="${layer.layer}"]`);
+            if (layerElement) {
+                layerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+        
+        navigation.appendChild(navDot);
+    });
+}
+
+/**
+ * 显示商店（占位符）
+ */
+function showShop() {
+    showNotification('商店功能开发中...', 'info');
+}
+
+/**
+ * 显示事件（占位符）
+ */
+function showEvent() {
+    const events = [
+        '发现了一台被遗忘的打印机，获得15金钱',
+        '加班到深夜，失去5点心态值但获得额外经验',
+        '在茶水间遇到了老板，获得意外赞赏'
+    ];
+    const randomEvent = events[Math.floor(Math.random() * events.length)];
+    showNotification(randomEvent, 'info');
+}
+
+/**
+ * 显示遗物奖励（占位符）
+ */
+function showRelicReward() {
+    showNotification('获得神秘遗物！', 'success');
+}
+
+/**
+ * 开始BOSS战斗
+ */
+async function startBossFight() {
+    showNotification('面对最终挑战...', 'warning');
+    await startCombat();
+}
+
+// 初始化游戏时调用地图初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 其他初始化代码...
+    initializeMap();
+});

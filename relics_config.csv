@@ -1,0 +1,10 @@
+遗物ID,中文名,英文名,稀有度,效果类型,数值效果,描述,配图建议,获得途径
+macbook_pro,苹果电脑,MacBook Pro,常见,每回合抽牌,1,每回合开始时额外抽1张牌,💻,商店/奖励
+ergonomic_chair,人体工学椅,Ergonomic Chair,常见,最大血量,15,增加15点最大心态值,🪑,商店/奖励
+coffee_machine,咖啡机,Coffee Machine,常见,精力回复,1,每回合开始时获得1点额外精力,☕,商店/奖励
+standing_desk,升降桌,Standing Desk,常见,格挡增强,3,每回合开始时获得3点格挡,🏢,商店/奖励
+noise_cancelling,降噪耳机,Noise-Cancelling Headphones,稀有,状态抗性,,免疫负面状态效果,🎧,遗物奖励
+private_office,独立办公室,Private Office,稀有,多重效果,,战斗开始时抽2张牌并获得1点精力,🚪,BOSS奖励
+golden_parachute,黄金降落伞,Golden Parachute,稀有,死亡拯救,,心态值降到0时恢复到50%最大值(每局限1次),🪂,特殊事件
+company_stock,公司股票,Company Stock,传说,金钱增长,100,每次战斗胜利额外获得100%金钱,📈,BOSS奖励
+ceo_privileges,CEO特权,CEO Privileges,传说,全能提升,,所有卡牌消耗-1(最低为0),👑,击败最终BOSS
