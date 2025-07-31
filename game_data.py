@@ -38,6 +38,7 @@ def load_csv_config(filename):
 CARDS_CONFIG = load_csv_config('cards_config.csv')
 RELICS_CONFIG = load_csv_config('relics_config.csv')
 MAP_CONFIG = load_csv_config('map_nodes_config.csv')
+BATTLE_EFFECTS_CONFIG = load_csv_config('battle_effects_config.csv')
 
 # 基于配置文件生成卡牌数据
 def generate_cards_from_config():

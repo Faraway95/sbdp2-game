@@ -1,0 +1,9 @@
+事件ID,事件名称,描述,选项1文本,选项1效果,选项2文本,选项2效果,选项3文本,选项3效果,触发条件,图标
+printer_find,遗忘的打印机,在角落发现了一台布满灰尘的打印机,修好它,money:20,无视它,nothing,举报给IT,money:10;inspiration:1,无,🖨️
+overtime_choice,深夜加班,又是一个需要加班的夜晚,坚持完成,money:30;burnout:2,摸鱼回家,hp:5,喝咖啡继续,energy:1;inspiration:1,无,🌙
+meeting_invitation,神秘会议,收到了一个神秘的会议邀请,参加会议,random_card,拒绝参加,nothing,偷听会议,money:15;weak:1,无,📧
+coffee_machine_broken,咖啡机坏了,茶水间的咖啡机坏了,修理它,relic:coffee_machine,买新的,money:-50,用茶替代,regeneration:2,无,☕
+colleague_help,同事求助,同事请你帮忙处理一些工作,帮助同事,team_spirit:2,拒绝帮助,money:10,偷偷完成,strength:1,无,🤝
+boss_encounter,偶遇老板,在电梯里遇到了老板,汇报工作,money:25;pressure:1,保持沉默,nothing,闲聊天气,inspiration:1,无,👔
+system_crash,系统崩溃,公司系统突然崩溃了,紧急修复,burnout:1;money:40,等IT处理,nothing,摸鱼休息,hp:10,无,💻
+birthday_cake,生日蛋糕,有同事生日，大家一起吃蛋糕,积极参与,team_spirit:1;hp:5,礼貌拒绝,money:5,默默享受,hp:10,无,🎂

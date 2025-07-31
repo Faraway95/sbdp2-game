@@ -167,6 +167,48 @@
         </div>
     </div>
     
+    <!-- 奖励选择界面 -->
+    <div class="modal-overlay hidden" id="rewardModal">
+        <div class="modal-content reward-modal">
+            <div class="modal-header">
+                <h2>选择奖励</h2>
+                <p class="reward-subtitle">完成任务，获得成长！</p>
+            </div>
+            <div class="reward-options" id="rewardOptions">
+                <!-- 奖励选项将通过JavaScript动态生成 -->
+            </div>
+            <button class="btn-secondary skip-reward" onclick="skipReward()">跳过奖励</button>
+        </div>
+    </div>
+
+    <!-- 商店界面 -->
+    <div class="modal-overlay hidden" id="shopModal">
+        <div class="modal-content shop-modal">
+            <div class="modal-header">
+                <h2>茶水间商店</h2>
+                <div class="shop-money">预算：¥<span id="shopMoney">100</span></div>
+                <button class="close-btn" onclick="closeShop()">×</button>
+            </div>
+            <div class="shop-sections">
+                <div class="shop-section">
+                    <h3>卡牌 📋</h3>
+                    <div class="shop-items" id="shopCards">
+                        <!-- 卡牌商品将通过JavaScript生成 -->
+                    </div>
+                </div>
+                <div class="shop-section">
+                    <h3>遗物 🏆</h3>
+                    <div class="shop-items" id="shopRelics">
+                        <!-- 遗物商品将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="shop-actions">
+                <button class="btn-secondary" onclick="closeShop()">离开商店</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 游戏结束界面 -->
     <div class="modal-overlay hidden" id="gameOverModal">
         <div class="modal-content">

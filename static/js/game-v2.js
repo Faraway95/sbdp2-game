@@ -1225,23 +1225,29 @@ async function selectNode(node) {
         switch (node.type) {
             case 'combat':
                 await startCombat();
+                // 战斗胜利后显示奖励选择
+                setTimeout(() => showRewardSelection('combat'), 1000);
                 break;
             case 'shop':
                 showShop();
-                break;
+                // 商店不需要完成，用户自己关闭
+                return;
             case 'event':
                 showEvent();
                 break;
             case 'relic':
-                showRelicReward();
+                showRewardSelection('relic');
                 break;
             case 'boss':
                 await startBossFight();
+                setTimeout(() => showRewardSelection('combat'), 1000);
                 break;
         }
         
-        // 完成节点
-        completeNode(node.id);
+        // 完成节点（商店除外）
+        if (node.type !== 'shop') {
+            setTimeout(() => completeNode(node.id), 2000);
+        }
         
     } catch (error) {
         console.error('选择节点错误:', error);
@@ -1326,23 +1332,415 @@ function renderNavigation() {
 }
 
 /**
- * 显示商店（占位符）
+ * 显示奖励选择界面
  */
-function showShop() {
-    showNotification('商店功能开发中...', 'info');
+function showRewardSelection(rewardType = 'combat') {
+    const rewardModal = document.getElementById('rewardModal');
+    const rewardOptions = document.getElementById('rewardOptions');
+    
+    rewardOptions.innerHTML = '';
+    
+    // 根据奖励类型生成不同选项
+    const rewards = generateRewards(rewardType);
+    
+    rewards.forEach((reward, index) => {
+        const option = document.createElement('div');
+        option.className = `reward-option ${reward.type}`;
+        option.onclick = () => selectReward(reward);
+        
+        option.innerHTML = `
+            <div class="reward-icon">${reward.icon}</div>
+            <div class="reward-title">${reward.title}</div>
+            <div class="reward-description">${reward.description}</div>
+        `;
+        
+        rewardOptions.appendChild(option);
+    });
+    
+    rewardModal.classList.remove('hidden');
 }
 
 /**
- * 显示事件（占位符）
+ * 生成奖励选项
+ */
+function generateRewards(type) {
+    const rewards = [];
+    
+    switch (type) {
+        case 'combat':
+            // 战斗胜利奖励
+            rewards.push({
+                type: 'money',
+                icon: '💰',
+                title: `${15 + Math.floor(Math.random() * 10)}金钱`,
+                description: '增加预算，用于购买装备',
+                value: 15 + Math.floor(Math.random() * 10)
+            });
+            
+            // 随机卡牌选择
+            const availableCards = ['coffee_break', 'delegation', 'overtime'];
+            const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+            rewards.push({
+                type: 'card',
+                icon: '🃏',
+                title: '新卡牌',
+                description: `获得卡牌：${randomCard}`,
+                cardId: randomCard
+            });
+            
+            // 小量生命恢复
+            rewards.push({
+                type: 'heal',
+                icon: '💚',
+                title: '心态调整',
+                description: '恢复8点心态值',
+                value: 8
+            });
+            break;
+            
+        case 'relic':
+            // 遗物奖励
+            const availableRelics = ['macbook_pro', 'ergonomic_chair', 'coffee_machine'];
+            availableRelics.forEach(relicId => {
+                rewards.push({
+                    type: 'relic',
+                    icon: '🏆',
+                    title: '办公室神器',
+                    description: `获得遗物：${relicId}`,
+                    relicId: relicId
+                });
+            });
+            break;
+    }
+    
+    return rewards.slice(0, 3); // 最多显示3个选项
+}
+
+/**
+ * 选择奖励
+ */
+async function selectReward(reward) {
+    try {
+        switch (reward.type) {
+            case 'money':
+                gameState.player.money += reward.value;
+                showNotification(`获得${reward.value}金钱！`, 'success');
+                break;
+                
+            case 'card':
+                // 添加卡牌到卡组
+                showNotification(`获得新卡牌：${reward.cardId}！`, 'success');
+                break;
+                
+            case 'heal':
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + reward.value);
+                showNotification(`恢复${reward.value}点心态值！`, 'success');
+                break;
+                
+            case 'relic':
+                gameState.relics.push(reward.relicId);
+                showNotification(`获得新遗物：${reward.relicId}！`, 'success');
+                break;
+        }
+        
+        // 更新UI
+        updateResourceDisplay();
+        closeRewardModal();
+        
+    } catch (error) {
+        console.error('选择奖励错误:', error);
+        showNotification('奖励领取失败', 'error');
+    }
+}
+
+/**
+ * 跳过奖励
+ */
+function skipReward() {
+    closeRewardModal();
+    showNotification('跳过了奖励选择', 'info');
+}
+
+/**
+ * 关闭奖励界面
+ */
+function closeRewardModal() {
+    document.getElementById('rewardModal').classList.add('hidden');
+}
+
+/**
+ * 显示商店
+ */
+function showShop() {
+    const shopModal = document.getElementById('shopModal');
+    const shopMoney = document.getElementById('shopMoney');
+    const shopCards = document.getElementById('shopCards');
+    const shopRelics = document.getElementById('shopRelics');
+    
+    // 更新金钱显示
+    shopMoney.textContent = gameState.player.money;
+    
+    // 生成商店商品
+    generateShopItems(shopCards, 'cards');
+    generateShopItems(shopRelics, 'relics');
+    
+    shopModal.classList.remove('hidden');
+}
+
+/**
+ * 生成商店商品
+ */
+function generateShopItems(container, type) {
+    container.innerHTML = '';
+    
+    const items = type === 'cards' ? 
+        [
+            { id: 'coffee_break', name: '咖啡时间', price: 50, description: '移除疲惫，获得灵感' },
+            { id: 'delegation', name: '委派任务', price: 40, description: '给敌人施加虚弱' },
+            { id: 'overtime', name: '加班', price: 30, description: '高伤害但自损心态' }
+        ] :
+        [
+            { id: 'macbook_pro', name: '苹果电脑', price: 100, description: '每回合额外抽1张牌' },
+            { id: 'ergonomic_chair', name: '人体工学椅', price: 80, description: '增加15点最大心态值' },
+            { id: 'coffee_machine', name: '咖啡机', price: 120, description: '每回合获得1点额外精力' }
+        ];
+    
+    items.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'shop-item';
+        
+        const canAfford = gameState.player.money >= item.price;
+        if (!canAfford) {
+            itemElement.classList.add('sold-out');
+        }
+        
+        itemElement.innerHTML = `
+            <div class="shop-item-header">
+                <div class="shop-item-name">${item.name}</div>
+                <div class="shop-item-price">¥${item.price}</div>
+            </div>
+            <div class="shop-item-description">${item.description}</div>
+        `;
+        
+        if (canAfford) {
+            itemElement.onclick = () => buyItem(item, type);
+        }
+        
+        container.appendChild(itemElement);
+    });
+}
+
+/**
+ * 购买商品
+ */
+function buyItem(item, type) {
+    if (gameState.player.money >= item.price) {
+        gameState.player.money -= item.price;
+        
+        if (type === 'cards') {
+            showNotification(`购买了卡牌：${item.name}`, 'success');
+        } else {
+            gameState.relics.push(item.id);
+            applyRelicEffect(item.id);
+            showNotification(`购买了遗物：${item.name}`, 'success');
+        }
+        
+        // 刷新商店显示
+        showShop();
+        updateResourceDisplay();
+    } else {
+        showNotification('预算不足！', 'error');
+    }
+}
+
+/**
+ * 应用遗物效果
+ */
+function applyRelicEffect(relicId) {
+    switch (relicId) {
+        case 'macbook_pro':
+            // 每回合开始时额外抽1张牌的效果将在回合开始时处理
+            break;
+        case 'ergonomic_chair':
+            gameState.player.maxHp += 15;
+            gameState.player.hp = Math.min(gameState.player.hp + 15, gameState.player.maxHp);
+            break;
+        case 'coffee_machine':
+            // 每回合额外精力的效果将在回合开始时处理
+            break;
+    }
+}
+
+/**
+ * 关闭商店
+ */
+function closeShop() {
+    document.getElementById('shopModal').classList.add('hidden');
+}
+
+/**
+ * 更新资源显示
+ */
+function updateResourceDisplay() {
+    document.getElementById('currentHP').textContent = gameState.player.hp;
+    document.getElementById('maxHP').textContent = gameState.player.maxHp;
+    document.getElementById('currentEnergy').textContent = gameState.player.energy;
+    document.getElementById('currentMoney').textContent = gameState.player.money;
+    document.getElementById('relicCount').textContent = gameState.relics.length;
+    
+    // 更新血条
+    const healthPercent = (gameState.player.hp / gameState.player.maxHp) * 100;
+    document.getElementById('healthBar').style.width = `${healthPercent}%`;
+}
+
+/**
+ * 显示事件
  */
 function showEvent() {
     const events = [
-        '发现了一台被遗忘的打印机，获得15金钱',
-        '加班到深夜，失去5点心态值但获得额外经验',
-        '在茶水间遇到了老板，获得意外赞赏'
+        {
+            id: 'printer_find',
+            name: '遗忘的打印机', 
+            description: '在角落发现了一台布满灰尘的打印机',
+            options: [
+                { text: '修好它', effect: 'money:20' },
+                { text: '无视它', effect: 'nothing' },
+                { text: '举报给IT', effect: 'money:10;inspiration:1' }
+            ]
+        },
+        {
+            id: 'overtime_choice',
+            name: '深夜加班',
+            description: '又是一个需要加班的夜晚',
+            options: [
+                { text: '坚持完成', effect: 'money:30;burnout:2' },
+                { text: '摸鱼回家', effect: 'hp:5' },
+                { text: '喝咖啡继续', effect: 'energy:1;inspiration:1' }
+            ]
+        },
+        {
+            id: 'boss_encounter',
+            name: '偶遇老板',
+            description: '在电梯里遇到了老板',
+            options: [
+                { text: '汇报工作', effect: 'money:25;pressure:1' },
+                { text: '保持沉默', effect: 'nothing' },
+                { text: '闲聊天气', effect: 'inspiration:1' }
+            ]
+        }
     ];
+    
     const randomEvent = events[Math.floor(Math.random() * events.length)];
-    showNotification(randomEvent, 'info');
+    showEventModal(randomEvent);
+}
+
+/**
+ * 显示事件模态框
+ */
+function showEventModal(event) {
+    // 创建事件模态框
+    const eventModal = document.createElement('div');
+    eventModal.className = 'modal-overlay';
+    eventModal.id = 'eventModal';
+    
+    eventModal.innerHTML = `
+        <div class="modal-content event-modal">
+            <div class="modal-header">
+                <h2>${event.name}</h2>
+                <p class="event-description">${event.description}</p>
+            </div>
+            <div class="event-options">
+                ${event.options.map((option, index) => `
+                    <div class="event-option" onclick="selectEventOption('${event.id}', ${index}, '${option.effect}')">
+                        <div class="option-text">${option.text}</div>
+                        <div class="option-preview">${getEffectPreview(option.effect)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(eventModal);
+}
+
+/**
+ * 获取效果预览文本
+ */
+function getEffectPreview(effectString) {
+    if (effectString === 'nothing') return '无影响';
+    
+    const effects = effectString.split(';');
+    const previews = effects.map(effect => {
+        const [type, value] = effect.split(':');
+        switch (type) {
+            case 'money': return `${value > 0 ? '+' : ''}${value}金钱`;
+            case 'hp': return `${value > 0 ? '+' : ''}${value}心态值`;
+            case 'energy': return `${value > 0 ? '+' : ''}${value}精力`;
+            case 'burnout': return `+${value}层疲惫`;
+            case 'inspiration': return `+${value}层灵感`;
+            case 'pressure': return `+${value}层压力`;
+            case 'team_spirit': return `+${value}层团队精神`;
+            case 'strength': return `+${value}层力量`;
+            case 'weak': return `+${value}层虚弱`;
+            case 'regeneration': return `+${value}层再生`;
+            default: return effect;
+        }
+    });
+    return previews.join(', ');
+}
+
+/**
+ * 选择事件选项
+ */
+function selectEventOption(eventId, optionIndex, effectString) {
+    // 应用效果
+    applyEventEffect(effectString);
+    
+    // 关闭事件模态框
+    const eventModal = document.getElementById('eventModal');
+    if (eventModal) {
+        eventModal.remove();
+    }
+    
+    showNotification('事件已处理', 'success');
+}
+
+/**
+ * 应用事件效果
+ */
+function applyEventEffect(effectString) {
+    if (effectString === 'nothing') return;
+    
+    const effects = effectString.split(';');
+    effects.forEach(effect => {
+        const [type, value] = effect.split(':');
+        const numValue = parseInt(value);
+        
+        switch (type) {
+            case 'money':
+                gameState.player.money += numValue;
+                break;
+            case 'hp':
+                gameState.player.hp = Math.min(gameState.player.maxHp, 
+                    Math.max(0, gameState.player.hp + numValue));
+                break;
+            case 'energy':
+                gameState.player.energy += numValue;
+                break;
+            // 特效应该在这里处理，暂时简化
+            case 'burnout':
+            case 'inspiration':
+            case 'pressure':
+            case 'team_spirit':
+            case 'strength':
+            case 'weak':
+            case 'regeneration':
+                showNotification(`获得${numValue}层${type}`, 'info');
+                break;
+        }
+    });
+    
+    updateResourceDisplay();
 }
 
 /**
