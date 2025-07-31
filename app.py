@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+import os
+import sys
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -7,10 +10,25 @@ import uuid
 from datetime import datetime
 from game_data import CARDS, ENEMIES, RELICS, PROJECT_STAGES, GameLogic
 
+# 设置UTF-8编码
+if sys.platform.startswith('win'):
+    import locale
+    try:
+        locale.setlocale(locale.LC_ALL, 'Chinese_China.UTF-8')
+    except:
+        try:
+            locale.setlocale(locale.LC_ALL, 'zh_CN.UTF-8')
+        except:
+            pass
+
 app = Flask(__name__)
-app.secret_key = 'sbdp2_office_card_game_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///office_card_game.db'
+app.secret_key = os.environ.get('SECRET_KEY', 'sbdp2_office_card_game_secret_key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///office_card_game.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# 修复Heroku PostgreSQL URL格式问题
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
 
 # 启用CORS支持
 CORS(app)
@@ -111,7 +129,10 @@ def start_game():
         username = data.get('username', '').strip()
         password = data.get('password', '').strip()
         
-        print(f"Login attempt - user: {username}, password: {password}")  # Debug info
+        try:
+            print(f"Login attempt - user: {username}, password: {password}")  # Debug info
+        except UnicodeEncodeError:
+            print("Login attempt - user: [encoded], password: [encoded]")
         
         if not username:
             return jsonify({'success': False, 'error': 'Please enter employee ID'}), 400
@@ -119,7 +140,7 @@ def start_game():
         if not password:
             return jsonify({'success': False, 'error': 'Please enter password'}), 400
         
-        # 简单的密码验证（可以根据需要扩展）
+        # 简单的密码验证
         valid_passwords = ['123456', 'admin', 'password', '666666', '888888', 'project']
         if password not in valid_passwords:
             return jsonify({'success': False, 'error': 'Password incorrect, please contact system administrator'}), 401
@@ -157,13 +178,19 @@ def start_game():
             }
         }
         
-        print(f"Login success - response: {response_data}")  # Debug info
+        try:
+            print(f"Login success - response: {response_data}")  # Debug info
+        except UnicodeEncodeError:
+            print("Login successful")
         return jsonify(response_data)
         
     except Exception as e:
         db.session.rollback()
         error_msg = str(e)
-        print(f"Login error: {error_msg}")
+        try:
+            print(f"Login error: {error_msg}")
+        except UnicodeEncodeError:
+            print("Login error occurred")
         return jsonify({'success': False, 'error': f'System error: {error_msg}'}), 500
 
 @app.route('/api/get_game_state')

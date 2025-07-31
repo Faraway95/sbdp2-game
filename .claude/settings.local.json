@@ -8,7 +8,10 @@
       "Bash(wmic process where processid=43684 delete:*)",
       "Bash(pip install:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(del /f instanceoffice_card_game.db instancetest_login.db)"
     ],
     "deny": []
   }
